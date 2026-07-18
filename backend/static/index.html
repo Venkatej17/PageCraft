@@ -307,7 +307,7 @@
                 </select>
                 <button type="button" class="toolbar-btn accent" id="save-visual-btn">Save changes</button>
               </div>
-              <p class="hint" style="margin-bottom:10px;">Turn on "Click to Edit", then: click any text to retype it, align it, or link it (phone/WhatsApp/email/URL) · click 🔓 in the toolbar to unlock a text block and drag it anywhere; click 🔒 to lock it back in place · click a photo box to upload an image, or the × on it to remove it · use the ▲▼ handles on the left of each section to reorder it · use "⤢ Big editor" above for a larger canvas. Don't forget to Save.</p>
+              <p class="hint" style="margin-bottom:10px;">Turn on "Click to Edit", then: click any text to retype it, or link it (phone/WhatsApp/email/URL) · click 🔓 in the toolbar to unlock a text block, then drag it anywhere and drag its amber corner handle to resize/shrink the text · click 🔒 to lock it back in place · click a photo box to upload an image, or the × on it to remove it · use the ▲▼ handles on the left of each section to reorder it · use "⤢ Big editor" above for a larger canvas. Don't forget to Save.</p>
               <p class="hint" style="margin-bottom:10px; color:#E8A33D;">⚠ Dragging pulls a text block out of the normal layout — check how it looks on mobile (resize your browser narrow) before sending the link to a client.</p>
               <div id="edit-status" class="status"></div>
             </div>
@@ -362,7 +362,8 @@
   let editModeOn = false;
   let activeSlotEl = null;      // .pc-slot currently being filled with an image
   let savedRange = null;        // text selection Range saved before the link prompt() steals focus
-  let activeBlockEl = null;     // the text block currently targeted by the alignment buttons
+  let activeBlockEl = null;     // the text block currently targeted by the toolbar
+  let resizeEl = null, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0, resizeStartFont = 16;
   let allProjects = [];
 
   // ---------- Projects ----------
@@ -500,6 +501,11 @@
       }
       #pc-link-toolbar { position:fixed; z-index:99999; display:none; }
       .pc-editing .pc-unlocked { outline: 2px dashed #E8A33D !important; outline-offset: 2px; z-index: 50; background: rgba(232,163,61,0.06); }
+      .pc-resize-handle {
+        position: absolute; right: -8px; bottom: -8px; width: 14px; height: 14px;
+        background: #E8A33D; border: 2px solid #0A0F1C; border-radius: 3px;
+        cursor: nwse-resize; z-index: 51;
+      }
     `;
     doc.head.appendChild(styleTag);
 
@@ -553,25 +559,17 @@
       }
     });
 
-    // Click into text -> floating format toolbar (alignment, lock/unlock+drag, Link when text selected)
+    // Click into text -> floating format toolbar (lock/unlock+drag, Link when text selected)
     let linkToolbar = doc.getElementById('pc-link-toolbar');
     if (!linkToolbar) {
       linkToolbar = doc.createElement('div');
       linkToolbar.id = 'pc-link-toolbar';
       linkToolbar.className = 'link-toolbar';
       linkToolbar.innerHTML = `
-        <button type="button" data-align="left" title="Align left">⬅</button>
-        <button type="button" data-align="center" title="Align center">⬌</button>
-        <button type="button" data-align="right" title="Align right">➡</button>
         <button type="button" id="pc-lock-btn" title="Lock/unlock free positioning">🔒</button>
         <button type="button" id="pc-add-link-btn" title="Turn selected text into a link">🔗 Link</button>`;
       doc.body.appendChild(linkToolbar);
       linkToolbar.querySelector('#pc-add-link-btn').addEventListener('click', () => applyLinkToSavedRange(doc));
-      linkToolbar.querySelectorAll('[data-align]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (activeBlockEl) activeBlockEl.style.textAlign = btn.getAttribute('data-align');
-        });
-      });
       linkToolbar.querySelector('#pc-lock-btn').addEventListener('click', () => toggleLock());
     }
 
@@ -586,13 +584,20 @@
       return null;
     }
 
-    function positionedAncestor(el) {
-      let p = el.parentElement;
-      while (p && p !== doc.body) {
-        if (getComputedStyle(p).position !== 'static') return p;
-        p = p.parentElement;
-      }
-      return doc.body;
+    function addResizeHandle(el) {
+      if (el.querySelector(':scope > .pc-resize-handle')) return;
+      const handle = doc.createElement('div');
+      handle.className = 'pc-resize-handle';
+      el.appendChild(handle);
+      handle.addEventListener('mousedown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        resizeEl = el;
+        resizeStartX = e.clientX; resizeStartY = e.clientY;
+        const rect = el.getBoundingClientRect();
+        resizeStartW = rect.width; resizeStartH = rect.height;
+        resizeStartFont = parseFloat(getComputedStyle(el).fontSize);
+        el.style.width = resizeStartW + 'px';
+      });
     }
 
     function toggleLock() {
@@ -600,46 +605,53 @@
       const lockBtn = linkToolbar.querySelector('#pc-lock-btn');
       const isUnlocked = activeBlockEl.classList.contains('pc-unlocked');
       if (isUnlocked) {
-        // Lock: stop dragging — stays exactly where it currently is
+        // Lock: stop dragging/resizing — stays exactly where it currently is
         activeBlockEl.classList.remove('pc-unlocked');
         activeBlockEl.style.cursor = '';
         lockBtn.textContent = '🔒';
       } else {
-        // Unlock: convert to free positioning at its CURRENT visual spot (no jump), then draggable
-        const anchor = positionedAncestor(activeBlockEl);
-        if (getComputedStyle(anchor).position === 'static') anchor.style.position = 'relative';
-        const elRect = activeBlockEl.getBoundingClientRect();
-        const anchorRect = anchor.getBoundingClientRect();
-        activeBlockEl.style.position = 'absolute';
-        activeBlockEl.style.left = (elRect.left - anchorRect.left) + 'px';
-        activeBlockEl.style.top = (elRect.top - anchorRect.top) + 'px';
-        activeBlockEl.style.margin = '0';
+        // Unlock: position:relative with a ZERO starting offset — guaranteed no visual jump,
+        // since the element still occupies its original space until you actually drag it.
+        if (getComputedStyle(activeBlockEl).position === 'static') {
+          activeBlockEl.style.position = 'relative';
+        }
+        if (!activeBlockEl.style.left) activeBlockEl.style.left = '0px';
+        if (!activeBlockEl.style.top) activeBlockEl.style.top = '0px';
         activeBlockEl.classList.add('pc-unlocked');
         activeBlockEl.style.cursor = 'move';
+        addResizeHandle(activeBlockEl);
         lockBtn.textContent = '🔓';
       }
     }
 
-    // Drag handling for unlocked elements
-    let dragEl = null, dragOffsetX = 0, dragOffsetY = 0, dragAnchor = null;
+    // Drag handling for unlocked elements (relative offset from current position — never jumps)
+    let dragEl = null, dragStartX = 0, dragStartY = 0, dragBaseLeft = 0, dragBaseTop = 0;
     doc.addEventListener('mousedown', (e) => {
       if (!editModeOn) return;
+      if (e.target.closest('.pc-resize-handle')) return;
       const target = e.target.closest('.pc-unlocked');
       if (!target) return;
       e.preventDefault();
       dragEl = target;
-      dragAnchor = positionedAncestor(target);
-      const rect = target.getBoundingClientRect();
-      dragOffsetX = e.clientX - rect.left;
-      dragOffsetY = e.clientY - rect.top;
+      dragStartX = e.clientX; dragStartY = e.clientY;
+      dragBaseLeft = parseFloat(target.style.left) || 0;
+      dragBaseTop = parseFloat(target.style.top) || 0;
     });
     doc.addEventListener('mousemove', (e) => {
-      if (!dragEl) return;
-      const anchorRect = dragAnchor.getBoundingClientRect();
-      dragEl.style.left = (e.clientX - anchorRect.left - dragOffsetX) + 'px';
-      dragEl.style.top = (e.clientY - anchorRect.top - dragOffsetY) + 'px';
+      if (dragEl) {
+        dragEl.style.left = (dragBaseLeft + (e.clientX - dragStartX)) + 'px';
+        dragEl.style.top = (dragBaseTop + (e.clientY - dragStartY)) + 'px';
+      }
+      if (resizeEl) {
+        const dx = e.clientX - resizeStartX;
+        const dy = e.clientY - resizeStartY;
+        const newW = Math.max(30, resizeStartW + dx);
+        const scale = newW / resizeStartW;
+        resizeEl.style.width = newW + 'px';
+        resizeEl.style.fontSize = Math.max(8, resizeStartFont * scale) + 'px';
+      }
     });
-    doc.addEventListener('mouseup', () => { dragEl = null; });
+    doc.addEventListener('mouseup', () => { dragEl = null; resizeEl = null; });
 
     doc.addEventListener('mouseup', () => {
       if (!editModeOn) { linkToolbar.style.display = 'none'; return; }
@@ -770,7 +782,7 @@
     const clone = doc.documentElement.cloneNode(true);
     const cloneBody = clone.querySelector('body');
     if (cloneBody) { cloneBody.removeAttribute('contenteditable'); cloneBody.classList.remove('pc-editing'); }
-    clone.querySelectorAll('.pc-slot-remove, .pc-section-handles, #pc-link-toolbar').forEach(el => el.remove());
+    clone.querySelectorAll('.pc-slot-remove, .pc-section-handles, #pc-link-toolbar, .pc-resize-handle').forEach(el => el.remove());
     clone.querySelectorAll('.pc-unlocked').forEach(el => {
       el.classList.remove('pc-unlocked');
       el.style.cursor = '';
