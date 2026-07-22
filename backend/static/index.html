@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PageCraft — Draft a landing page in minutes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-950:#0A0F1C;
+    --navy-900:#0F1626;
+    --navy-800:#161F35;
+    --navy-700:#212C48;
+    --grid-line:rgba(94,140,255,0.08);
+    --amber:#E8A33D;
+    --amber-soft:#F2C878;
+    --ice:#C9D3E8;
+    --ice-dim:#8B96B4;
+    --white:#F5F7FC;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      var(--navy-950);
+    background-size: 32px 32px, 32px 32px, auto;
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+  .wrap{ max-width: 1160px; margin: 0 auto; padding: 56px 28px 100px; }
+
+  /* Header */
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.14em;
+    color: var(--amber); text-transform:uppercase; display:flex; align-items:center; gap:10px;
+    margin-bottom: 18px;
+  }
+  .eyebrow::before{ content:''; width:22px; height:1px; background:var(--amber); display:inline-block; }
+  h1{
+    font-family:'Fraunces', serif; font-weight:600; font-size: clamp(34px, 5vw, 54px);
+    line-height:1.08; letter-spacing:-0.01em; max-width: 720px; margin-bottom:16px;
+  }
+  h1 em{ font-style:italic; color: var(--amber-soft); }
+  .sub{ color: var(--ice-dim); font-size:16px; max-width:560px; margin-bottom:48px; }
+
+  /* Layout */
+  .grid{ display:grid; grid-template-columns: 1fr; gap: 28px; }
+  @media(min-width:980px){ .grid{ grid-template-columns: 1fr 1fr; align-items:start; } }
+
+  .panel{
+    background: var(--navy-900);
+    border: 1px solid var(--navy-700);
+    border-radius: 4px;
+    position: relative;
+  }
+  .panel::before{
+    content:''; position:absolute; top:-1px; left:-1px; width:14px; height:14px;
+    border-top:2px solid var(--amber); border-left:2px solid var(--amber);
+  }
+  .panel::after{
+    content:''; position:absolute; bottom:-1px; right:-1px; width:14px; height:14px;
+    border-bottom:2px solid var(--amber); border-right:2px solid var(--amber);
+  }
+  .panel-inner{ padding: 32px; }
+  .panel-label{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.12em;
+    color: var(--ice-dim); text-transform:uppercase; margin-bottom: 24px; display:block;
+  }
+
+  /* Form */
+  .field{ margin-bottom: 20px; }
+  .field label{
+    display:block; font-size:13px; color: var(--ice); margin-bottom:7px; font-weight:500;
+  }
+  .field .hint{ color: var(--ice-dim); font-weight:400; font-size:12px; }
+  .field input, .field textarea{
+    width:100%; background: var(--navy-800); border:1px solid var(--navy-700);
+    border-radius:3px; padding:11px 13px; color: var(--white); font-family:'Inter',sans-serif;
+    font-size:14px; outline:none; transition: border-color .15s;
+  }
+  .field input:focus, .field textarea:focus{ border-color: var(--amber); }
+  .field textarea{ resize: vertical; min-height:64px; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+  .btn{
+    width:100%; background: var(--amber); color: var(--navy-950); border:none;
+    padding:14px 20px; border-radius:3px; font-family:'JetBrains Mono', monospace;
+    font-size:13px; font-weight:500; letter-spacing:0.06em; text-transform:uppercase;
+    cursor:pointer; margin-top: 8px; transition: background .15s, transform .1s;
+  }
+  .btn:hover{ background: var(--amber-soft); }
+  .btn:active{ transform: scale(0.99); }
+  .btn:disabled{ opacity:0.5; cursor:default; }
+
+  /* Preview panel */
+  .preview-empty{
+    padding: 60px 32px; text-align:center; color: var(--ice-dim); font-size:14px;
+  }
+  .preview-empty .glyph{
+    font-family:'Fraunces', serif; font-size:40px; color: var(--navy-700); margin-bottom:14px;
+  }
+  .preview-frame{ padding: 20px; }
+  .link-row{
+    display:flex; gap:8px; background: var(--navy-800); border:1px solid var(--navy-700);
+    border-radius:3px; padding:10px 12px; margin-bottom:14px; align-items:center;
+  }
+  .link-row input{
+    flex:1; background:none; border:none; color: var(--amber-soft); font-family:'JetBrains Mono', monospace;
+    font-size:12.5px; outline:none;
+  }
+  .link-row button{
+    background: var(--navy-700); border:none; color: var(--ice); padding:6px 12px;
+    border-radius:2px; font-size:12px; cursor:pointer; font-family:'JetBrains Mono', monospace;
+  }
+  .link-row button:hover{ background: var(--navy-700); color: var(--amber-soft); }
+  iframe{
+    width:100%; height: 480px; border:1px solid var(--navy-700); border-radius:3px; background:#fff;
+  }
+  .domain-box{ margin-top: 22px; padding-top:20px; border-top:1px dashed var(--navy-700); }
+  .edit-box{ margin-top: 22px; padding-top:20px; border-top:1px dashed var(--navy-700); }
+  .toolbar{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+  .toolbar-btn{
+    background: var(--navy-800); border:1px solid var(--navy-700); color: var(--ice);
+    padding:9px 14px; border-radius:3px; font-family:'JetBrains Mono', monospace; font-size:12px;
+    cursor:pointer; transition: all .15s;
+  }
+  .toolbar-btn:hover{ border-color: var(--amber); }
+  .toolbar-btn.active{ background: var(--amber); color: var(--navy-950); border-color: var(--amber); }
+  .toolbar-btn.accent{ background: var(--amber); color: var(--navy-950); border-color: var(--amber); font-weight:500; }
+  .toolbar-btn.accent:hover{ background: var(--amber-soft); }
+  .toolbar-select{
+    background: var(--navy-800); border:1px solid var(--navy-700); color: var(--ice);
+    padding:9px 12px; border-radius:3px; font-family:'JetBrains Mono', monospace; font-size:12px;
+    cursor:pointer;
+  }
+
+  /* Projects list */
+  .projects-head{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; }
+  .projects-list{ display:flex; flex-direction:column; gap:8px; }
+  .project-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background: var(--navy-800); border:1px solid var(--navy-700); border-radius:3px;
+    padding:12px 14px;
+  }
+  .project-item-name{ font-size:14px; color:var(--white); font-weight:500; }
+  .project-item-meta{ font-size:11.5px; color:var(--ice-dim); font-family:'JetBrains Mono', monospace; margin-top:2px; }
+  .project-item-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .project-item-actions button{
+    background: var(--navy-700); border:none; color: var(--ice); padding:6px 10px;
+    border-radius:2px; font-size:11.5px; cursor:pointer; font-family:'JetBrains Mono', monospace;
+  }
+  .project-item-actions button:hover{ color: var(--amber-soft); }
+
+  /* Preview head + fullscreen */
+  .preview-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+  .grid.expanded{ grid-template-columns: 1fr; }
+  .grid.expanded #form-panel, .grid.expanded > .panel:not(#preview-panel){ display:none; }
+  .grid.expanded iframe{ height: 74vh; }
+
+  /* Section reorder handles (added dynamically inside iframe via injected style) */
+  .link-toolbar{
+    position:absolute; z-index:99999; background: var(--navy-950); border:1px solid var(--amber);
+    border-radius:4px; padding:6px 8px; display:flex; gap:6px; box-shadow:0 4px 16px rgba(0,0,0,0.4);
+  }
+  .link-toolbar button{
+    background:none; border:none; color: var(--amber-soft); font-size:12px; cursor:pointer;
+    font-family:'JetBrains Mono', monospace; padding:2px 6px;
+  }
+  .status{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--ice-dim); margin-top:14px; }
+  .status.err{ color:#E8785F; }
+  .spinner{
+    display:inline-block; width:12px; height:12px; border:2px solid var(--navy-700);
+    border-top-color: var(--amber); border-radius:50%; animation: spin .7s linear infinite; margin-right:8px;
+    vertical-align:middle;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Pagecraft — 001</div>
+    <h1>Draft a landing page<br/><em>before you build it.</em></h1>
+    <p class="sub">Describe the business. Get a complete, ready-to-share page in about a minute — free to generate, yours to sell.</p>
+
+    <div class="panel" style="margin-bottom:28px;">
+      <div class="panel-inner">
+        <div class="projects-head">
+          <span class="panel-label" style="margin-bottom:0;">My Projects</span>
+          <div class="link-row" style="max-width:260px; margin-bottom:0;">
+            <input type="text" id="project-search" placeholder="Search projects…" />
+          </div>
+        </div>
+        <div id="projects-list" class="projects-list">
+          <p class="hint">No projects yet — generate your first page below.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Form panel -->
+      <div class="panel" id="form-panel">
+        <div class="panel-inner">
+          <span class="panel-label">01 · Business Brief</span>
+          <form id="pc-form">
+            <div class="field">
+              <label>Business name</label>
+              <input type="text" id="business_name" placeholder="Cafe Aroma" required />
+            </div>
+            <div class="row2">
+              <div class="field">
+                <label>Industry</label>
+                <input type="text" id="industry" placeholder="Cafe / Restaurant" required />
+              </div>
+              <div class="field">
+                <label>Primary color <span class="hint">(optional)</span></label>
+                <input type="text" id="primary_color" placeholder="Warm terracotta" />
+              </div>
+            </div>
+            <div class="field">
+              <label>What do they do?</label>
+              <textarea id="description" placeholder="A neighborhood cafe serving specialty coffee and fresh pastries, known for a cozy community vibe." required></textarea>
+            </div>
+            <div class="field">
+              <label>Target audience <span class="hint">(optional)</span></label>
+              <input type="text" id="target_audience" placeholder="Students and young professionals nearby" />
+            </div>
+            <div class="row2">
+              <div class="field">
+                <label>Style preference <span class="hint">(optional)</span></label>
+                <input type="text" id="style_preference" placeholder="Warm, modern, minimal" />
+              </div>
+              <div class="field">
+                <label>Main CTA <span class="hint">(optional)</span></label>
+                <input type="text" id="cta_goal" placeholder="Get directions / order now" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Sections wanted <span class="hint">(optional)</span></label>
+              <input type="text" id="sections_wanted" placeholder="Hero, Menu highlights, Gallery, Reviews, Contact" />
+            </div>
+            <div class="row2">
+              <div class="field">
+                <label>Contact phone</label>
+                <input type="text" id="contact_phone" placeholder="+91…" />
+              </div>
+              <div class="field">
+                <label>Contact email</label>
+                <input type="text" id="contact_email" placeholder="hello@…" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Instagram / website link <span class="hint">(optional)</span></label>
+              <input type="text" id="contact_social" placeholder="instagram.com/…" />
+            </div>
+            <div class="field">
+              <label>Anything else? <span class="hint">(optional)</span></label>
+              <textarea id="extra_notes" placeholder="USP, tone of voice, things to avoid…"></textarea>
+            </div>
+            <button type="submit" class="btn" id="submit-btn">Generate page</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Preview panel -->
+      <div class="panel" id="preview-panel">
+        <div class="panel-inner">
+          <div class="preview-head">
+            <span class="panel-label" style="margin-bottom:0;">02 · Draft Preview</span>
+            <button type="button" class="toolbar-btn" id="fullscreen-btn" style="display:none;">⤢ Big editor</button>
+          </div>
+          <div id="preview-empty" class="preview-empty">
+            <div class="glyph">◇</div>
+            Fill in the brief and generate — your draft will appear here.
+          </div>
+          <div id="preview-frame" class="preview-frame" style="display:none;">
+            <div class="link-row">
+              <input type="text" id="share-link" readonly />
+              <button type="button" id="copy-btn">Copy</button>
+            </div>
+
+            <div class="edit-box">
+              <span class="panel-label" style="margin-bottom:10px;">03 · Ask AI to change something</span>
+              <div class="link-row">
+                <input type="text" id="ai-edit-input" placeholder="Make the CTA button larger and orange" />
+                <button type="button" id="ai-edit-btn">Apply</button>
+              </div>
+              <div id="ai-edit-status" class="status"></div>
+            </div>
+
+            <div class="edit-box">
+              <span class="panel-label" style="margin-bottom:10px;">04 · Edit directly on the page</span>
+              <div class="toolbar">
+                <button type="button" class="toolbar-btn" id="edit-mode-btn">✎ Click to Edit: Off</button>
+                <select id="font-select" class="toolbar-select">
+                  <option value="">Change font…</option>
+                  <option value="Inter">Inter — clean</option>
+                  <option value="Fraunces">Fraunces — elegant serif</option>
+                  <option value="Poppins">Poppins — modern</option>
+                  <option value="Playfair Display">Playfair Display — luxury</option>
+                  <option value="Space Grotesk">Space Grotesk — bold/tech</option>
+                  <option value="Lora">Lora — warm serif</option>
+                  <option value="DM Sans">DM Sans — friendly</option>
+                </select>
+                <button type="button" class="toolbar-btn accent" id="save-visual-btn">Save changes</button>
+              </div>
+              <p class="hint" style="margin-bottom:10px;">Turn on "Click to Edit", then: click any text to retype it, or link it (phone/WhatsApp/email/URL) · click 🔓 in the toolbar to unlock a text block, then drag it anywhere and drag its amber corner handle to resize/shrink the text · click 🔒 to lock it back in place · click a photo box to upload an image, or the × on it to remove it · use the ▲▼ handles on the left of each section to reorder it · use "⤢ Big editor" above for a larger canvas. Don't forget to Save.</p>
+              <p class="hint" style="margin-bottom:10px; color:#E8A33D;">⚠ Dragging pulls a text block out of the normal layout — check how it looks on mobile (resize your browser narrow) before sending the link to a client.</p>
+              <div id="edit-status" class="status"></div>
+            </div>
+
+            <iframe id="preview-iframe"></iframe>
+            <input type="file" id="image-file-input" accept="image/*" style="display:none;" />
+            <input type="file" id="video-file-input" accept="video/*" style="display:none;" />
+
+            <div class="domain-box">
+              <span class="panel-label" style="margin-bottom:10px;">05 · Attach client's domain <span class="hint">(once they've bought one)</span></span>
+              <div class="link-row">
+                <input type="text" id="domain-input" placeholder="cafearoma.com" />
+                <button type="button" id="attach-btn">Attach</button>
+              </div>
+              <div id="domain-status" class="status"></div>
+            </div>
+
+            <div class="domain-box">
+              <span class="panel-label" style="margin-bottom:10px;">06 · Enquiry notifications <span class="hint">(where booking/contact form submissions get emailed)</span></span>
+              <div class="link-row">
+                <input type="email" id="notify-email-input" placeholder="owner@cafearoma.com" />
+                <button type="button" id="notify-email-btn">Save</button>
+              </div>
+              <div id="notify-email-status" class="status"></div>
+            </div>
+
+            <div class="domain-box">
+              <span class="panel-label" style="margin-bottom:10px;">07 · Enquiries received</span>
+              <button type="button" class="toolbar-btn" id="refresh-enquiries-btn">↻ Refresh</button>
+              <div id="enquiries-list" style="margin-top:12px;"><p class="hint">No enquiries yet.</p></div>
+            </div>
+          </div>
+          <div id="status" class="status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const API_BASE = window.location.origin + '/api';
+  const form = document.getElementById('pc-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const statusEl = document.getElementById('status');
+  const previewEmpty = document.getElementById('preview-empty');
+  const previewFrame = document.getElementById('preview-frame');
+  const previewPanel = document.getElementById('preview-panel');
+  const grid = document.querySelector('.grid');
+  const iframe = document.getElementById('preview-iframe');
+  const shareLink = document.getElementById('share-link');
+  const copyBtn = document.getElementById('copy-btn');
+  const domainInput = document.getElementById('domain-input');
+  const attachBtn = document.getElementById('attach-btn');
+  const domainStatus = document.getElementById('domain-status');
+  const notifyEmailInput = document.getElementById('notify-email-input');
+  const notifyEmailBtn = document.getElementById('notify-email-btn');
+  const notifyEmailStatus = document.getElementById('notify-email-status');
+  const refreshEnquiriesBtn = document.getElementById('refresh-enquiries-btn');
+  const enquiriesList = document.getElementById('enquiries-list');
+  const aiEditInput = document.getElementById('ai-edit-input');
+  const aiEditBtn = document.getElementById('ai-edit-btn');
+  const aiEditStatus = document.getElementById('ai-edit-status');
+  const editModeBtn = document.getElementById('edit-mode-btn');
+  const fontSelect = document.getElementById('font-select');
+  const saveVisualBtn = document.getElementById('save-visual-btn');
+  const editStatus = document.getElementById('edit-status');
+  const imageFileInput = document.getElementById('image-file-input');
+  const videoFileInput = document.getElementById('video-file-input');
+  const fullscreenBtn = document.getElementById('fullscreen-btn');
+  const projectsList = document.getElementById('projects-list');
+  const projectSearch = document.getElementById('project-search');
+  const businessNameInput = document.getElementById('business_name');
+
+  let currentSlug = null;
+  let editModeOn = false;
+  let activeSlotEl = null;      // .pc-slot currently being filled with an image
+  let savedRange = null;        // text selection Range saved before the link prompt() steals focus
+  let activeBlockEl = null;     // the text block currently targeted by the toolbar
+  let resizeEl = null, resizeStartX = 0, resizeStartY = 0, resizeStartW = 0, resizeStartH = 0, resizeStartFont = 16;
+  let allProjects = [];
+
+  // ---------- Projects ----------
+  async function loadProjects() {
+    try {
+      const res = await fetch(`${API_BASE}/pages`);
+      allProjects = await res.json();
+      renderProjects(allProjects);
+    } catch (e) {
+      projectsList.innerHTML = '<p class="hint">Could not load projects.</p>';
+    }
+  }
+
+  function renderProjects(list) {
+    if (!list.length) {
+      projectsList.innerHTML = '<p class="hint">No projects yet — generate your first page below.</p>';
+      return;
+    }
+    projectsList.innerHTML = '';
+    list.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'project-item';
+      const date = new Date(p.created_at).toLocaleDateString();
+      row.innerHTML = `
+        <div>
+          <div class="project-item-name">${p.business_name}</div>
+          <div class="project-item-meta">${p.industry || ''} · ${date}${p.domain ? ' · ' + p.domain : ''}</div>
+        </div>
+        <div class="project-item-actions">
+          <button type="button" data-act="open">Open</button>
+          <button type="button" data-act="rename">Rename</button>
+          <button type="button" data-act="delete">Delete</button>
+        </div>`;
+      row.querySelector('[data-act="open"]').addEventListener('click', () => openProject(p.slug));
+      row.querySelector('[data-act="rename"]').addEventListener('click', () => renameProject(p.slug, p.business_name));
+      row.querySelector('[data-act="delete"]').addEventListener('click', () => deleteProject(p.slug));
+      projectsList.appendChild(row);
+    });
+  }
+
+  projectSearch.addEventListener('input', () => {
+    const q = projectSearch.value.trim().toLowerCase();
+    renderProjects(allProjects.filter(p => p.business_name.toLowerCase().includes(q)));
+  });
+
+  async function openProject(slug) {
+    statusEl.className = 'status';
+    statusEl.textContent = 'Loading project…';
+    try {
+      const res = await fetch(`${API_BASE}/pages/${slug}`);
+      if (!res.ok) throw new Error('Could not load this project');
+      const data = await res.json();
+      currentSlug = data.slug;
+      shareLink.value = `${window.location.origin}/p/${data.slug}`;
+      loadIntoIframe(data.html);
+      previewEmpty.style.display = 'none';
+      previewFrame.style.display = 'block';
+      fullscreenBtn.style.display = 'inline-block';
+      statusEl.textContent = `Editing "${data.business_name}".`;
+      previewPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      loadEnquiries();
+    } catch (e) {
+      statusEl.className = 'status err';
+      statusEl.textContent = 'Error: ' + e.message;
+    }
+  }
+
+  async function renameProject(slug, oldName) {
+    const name = prompt('New project name:', oldName);
+    if (!name || name === oldName) return;
+    try {
+      await fetch(`${API_BASE}/pages/${slug}/rename`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ business_name: name }),
+      });
+      loadProjects();
+    } catch (e) { alert('Rename failed: ' + e.message); }
+  }
+
+  async function deleteProject(slug) {
+    if (!confirm('Delete this project permanently?')) return;
+    try {
+      await fetch(`${API_BASE}/pages/${slug}`, { method: 'DELETE' });
+      loadProjects();
+    } catch (e) { alert('Delete failed: ' + e.message); }
+  }
+
+  loadProjects();
+
+  // ---------- Fullscreen / big editor ----------
+  fullscreenBtn.addEventListener('click', () => {
+    grid.classList.toggle('expanded');
+    fullscreenBtn.textContent = grid.classList.contains('expanded') ? '⤢ Exit big editor' : '⤢ Big editor';
+  });
+
+  // ---------- Load a page into the iframe ----------
+  function loadIntoIframe(html) {
+    editModeOn = false;
+    editModeBtn.textContent = '✎ Click to Edit: Off';
+    editModeBtn.classList.remove('active');
+    iframe.srcdoc = html;
+  }
+
+  // Re-attach all editing behavior every time the iframe finishes loading new content
+  iframe.addEventListener('load', () => {
+    const doc = iframe.contentDocument;
+    if (!doc || !doc.body) return;
+
+    const styleTag = doc.createElement('style');
+    styleTag.id = 'pc-editor-style';
+    styleTag.textContent = `
+      .pc-editing [contenteditable="true"] { outline: none; }
+      .pc-editing *:hover { outline: 1.5px dashed #E8A33D !important; outline-offset: 2px; cursor: text; }
+      .pc-editing .pc-slot:hover { cursor: pointer; outline: 2px dashed #E8A33D !important; }
+      .pc-editing .pc-slot::after {
+        content: 'Click to upload photo'; position:absolute; inset:0; display:flex; align-items:center;
+        justify-content:center; background: rgba(10,15,28,0.55); color:#F2C878; font-family: sans-serif;
+        font-size: 13px; opacity:0; transition: opacity .15s; pointer-events:none; z-index:1;
+      }
+      .pc-editing .pc-slot:hover::after { opacity: 1; }
+      .pc-slot-remove {
+        position:absolute; top:6px; right:6px; z-index:5; width:24px; height:24px; border-radius:50%;
+        background:#E8785F; color:#fff; border:none; font-size:14px; line-height:1; cursor:pointer;
+        display:none; align-items:center; justify-content:center;
+      }
+      .pc-editing .pc-slot:hover .pc-slot-remove { display:flex; }
+      .pc-section { position:relative; }
+      .pc-section-handles {
+        position:absolute; left:-38px; top:50%; transform:translateY(-50%); z-index:5;
+        display:none; flex-direction:column; gap:4px;
+      }
+      .pc-editing .pc-section:hover .pc-section-handles { display:flex; }
+      .pc-section-handles button {
+        width:28px; height:28px; border-radius:4px; border:1px solid #E8A33D; background:#0A0F1C;
+        color:#E8A33D; font-size:12px; cursor:pointer;
+      }
+      #pc-link-toolbar { position:fixed; z-index:99999; display:none; }
+      .pc-editing .pc-unlocked { outline: 2px dashed #E8A33D !important; outline-offset: 2px; z-index: 50; background: rgba(232,163,61,0.06); }
+      .pc-resize-handle {
+        position: absolute; right: -8px; bottom: -8px; width: 14px; height: 14px;
+        background: #E8A33D; border: 2px solid #0A0F1C; border-radius: 3px;
+        cursor: nwse-resize; z-index: 51;
+      }
+    `;
+    doc.head.appendChild(styleTag);
+
+    // Position image slots + add remove buttons
+    doc.querySelectorAll('.pc-slot').forEach(el => {
+      if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+      el.style.overflow = 'hidden';
+      if (!el.querySelector('.pc-slot-remove')) {
+        const rm = doc.createElement('button');
+        rm.className = 'pc-slot-remove';
+        rm.type = 'button';
+        rm.textContent = '×';
+        rm.addEventListener('click', (e) => {
+          e.stopPropagation(); e.preventDefault();
+          if (confirm('Remove this photo?')) el.remove();
+        });
+        el.appendChild(rm);
+      }
+    });
+
+    // Add reorder handles to each section
+    doc.querySelectorAll('.pc-section').forEach(sec => {
+      if (sec.querySelector(':scope > .pc-section-handles')) return;
+      const handles = doc.createElement('div');
+      handles.className = 'pc-section-handles';
+      handles.innerHTML = `<button type="button" data-dir="up" title="Move section up">▲</button><button type="button" data-dir="down" title="Move section down">▼</button>`;
+      handles.querySelector('[data-dir="up"]').addEventListener('click', (e) => {
+        e.stopPropagation();
+        let sib = sec.previousElementSibling;
+        while (sib && !sib.classList.contains('pc-section')) sib = sib.previousElementSibling;
+        if (sib) sib.before(sec);
+      });
+      handles.querySelector('[data-dir="down"]').addEventListener('click', (e) => {
+        e.stopPropagation();
+        let sib = sec.nextElementSibling;
+        while (sib && !sib.classList.contains('pc-section')) sib = sib.nextElementSibling;
+        if (sib) sib.after(sec);
+      });
+      sec.appendChild(handles);
+    });
+
+    // Slot click -> upload (image) or video source picker
+    doc.body.addEventListener('click', (e) => {
+      if (!editModeOn) return;
+      if (e.target.closest('.pc-slot-remove')) return;
+      const slot = e.target.closest('.pc-slot');
+      if (!slot) return;
+      e.preventDefault();
+      const slotType = slot.getAttribute('data-slot-type') || 'image';
+      if (slotType === 'video') {
+        handleVideoSlot(slot);
+      } else {
+        activeSlotEl = slot;
+        imageFileInput.click();
+      }
+    });
+
+    function handleVideoSlot(slot) {
+      const link = prompt('Paste a YouTube or Vimeo link — or leave this blank and click OK to upload a video file instead:');
+      if (link === null) return; // cancelled
+      if (link.trim()) {
+        const embedUrl = toEmbedUrl(link.trim());
+        if (!embedUrl) { alert('Could not recognize that as a YouTube or Vimeo link.'); return; }
+        slot.innerHTML = `<iframe src="${embedUrl}" style="width:100%;height:100%;border:0;display:block;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        addRemoveButton(slot);
+      } else {
+        activeSlotEl = slot;
+        videoFileInput.click();
+      }
+    }
+
+    function toEmbedUrl(url) {
+      let m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{6,})/);
+      if (m) return `https://www.youtube.com/embed/${m[1]}`;
+      m = url.match(/vimeo\.com\/(\d+)/);
+      if (m) return `https://player.vimeo.com/video/${m[1]}`;
+      return null;
+    }
+
+    function addRemoveButton(slot) {
+      const rm = doc.createElement('button');
+      rm.className = 'pc-slot-remove'; rm.type = 'button'; rm.textContent = '×';
+      rm.addEventListener('click', (e) => {
+        e.stopPropagation(); e.preventDefault();
+        if (confirm('Remove this?')) slot.remove();
+      });
+      slot.appendChild(rm);
+    }
+
+    // Click into text -> floating format toolbar (lock/unlock+drag, Link when text selected)
+    let linkToolbar = doc.getElementById('pc-link-toolbar');
+    if (!linkToolbar) {
+      linkToolbar = doc.createElement('div');
+      linkToolbar.id = 'pc-link-toolbar';
+      linkToolbar.className = 'link-toolbar';
+      linkToolbar.innerHTML = `
+        <button type="button" id="pc-lock-btn" title="Lock/unlock free positioning">🔒</button>
+        <button type="button" id="pc-add-link-btn" title="Turn selected text into a link">🔗 Link</button>`;
+      doc.body.appendChild(linkToolbar);
+      linkToolbar.querySelector('#pc-add-link-btn').addEventListener('click', () => applyLinkToSavedRange(doc));
+      linkToolbar.querySelector('#pc-lock-btn').addEventListener('click', () => toggleLock());
+    }
+
+    function closestTextBlock(node) {
+      let el = node.nodeType === 3 ? node.parentElement : node;
+      while (el && el !== doc.body) {
+        const tag = el.tagName;
+        if (/^(P|H1|H2|H3|H4|H5|H6|LI|BLOCKQUOTE|SPAN|A|BUTTON)$/.test(tag)) return el;
+        if (tag === 'DIV' && el.childElementCount === 0) return el; // text-only div
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    function addResizeHandle(el) {
+      if (el.querySelector(':scope > .pc-resize-handle')) return;
+      const handle = doc.createElement('div');
+      handle.className = 'pc-resize-handle';
+      el.appendChild(handle);
+      handle.addEventListener('mousedown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        resizeEl = el;
+        resizeStartX = e.clientX; resizeStartY = e.clientY;
+        const rect = el.getBoundingClientRect();
+        resizeStartW = rect.width; resizeStartH = rect.height;
+        resizeStartFont = parseFloat(getComputedStyle(el).fontSize);
+        el.style.width = resizeStartW + 'px';
+      });
+    }
+
+    function toggleLock() {
+      if (!activeBlockEl) return;
+      const lockBtn = linkToolbar.querySelector('#pc-lock-btn');
+      const isUnlocked = activeBlockEl.classList.contains('pc-unlocked');
+      if (isUnlocked) {
+        // Lock: stop dragging/resizing — stays exactly where it currently is
+        activeBlockEl.classList.remove('pc-unlocked');
+        activeBlockEl.style.cursor = '';
+        lockBtn.textContent = '🔒';
+      } else {
+        // Unlock: position:relative with a ZERO starting offset — guaranteed no visual jump,
+        // since the element still occupies its original space until you actually drag it.
+        if (getComputedStyle(activeBlockEl).position === 'static') {
+          activeBlockEl.style.position = 'relative';
+        }
+        if (!activeBlockEl.style.left) activeBlockEl.style.left = '0px';
+        if (!activeBlockEl.style.top) activeBlockEl.style.top = '0px';
+        activeBlockEl.classList.add('pc-unlocked');
+        activeBlockEl.style.cursor = 'move';
+        addResizeHandle(activeBlockEl);
+        lockBtn.textContent = '🔓';
+      }
+    }
+
+    // Drag handling for unlocked elements (relative offset from current position — never jumps)
+    let dragEl = null, dragStartX = 0, dragStartY = 0, dragBaseLeft = 0, dragBaseTop = 0;
+    doc.addEventListener('mousedown', (e) => {
+      if (!editModeOn) return;
+      if (e.target.closest('.pc-resize-handle')) return;
+      const target = e.target.closest('.pc-unlocked');
+      if (!target) return;
+      e.preventDefault();
+      dragEl = target;
+      dragStartX = e.clientX; dragStartY = e.clientY;
+      dragBaseLeft = parseFloat(target.style.left) || 0;
+      dragBaseTop = parseFloat(target.style.top) || 0;
+    });
+    doc.addEventListener('mousemove', (e) => {
+      if (dragEl) {
+        dragEl.style.left = (dragBaseLeft + (e.clientX - dragStartX)) + 'px';
+        dragEl.style.top = (dragBaseTop + (e.clientY - dragStartY)) + 'px';
+      }
+      if (resizeEl) {
+        const dx = e.clientX - resizeStartX;
+        const dy = e.clientY - resizeStartY;
+        const newW = Math.max(30, resizeStartW + dx);
+        const scale = newW / resizeStartW;
+        resizeEl.style.width = newW + 'px';
+        resizeEl.style.fontSize = Math.max(8, resizeStartFont * scale) + 'px';
+      }
+    });
+    doc.addEventListener('mouseup', () => { dragEl = null; resizeEl = null; });
+
+    doc.addEventListener('mouseup', () => {
+      if (!editModeOn) { linkToolbar.style.display = 'none'; return; }
+      const sel = doc.getSelection();
+      if (!sel || sel.rangeCount === 0) { linkToolbar.style.display = 'none'; return; }
+      const range = sel.getRangeAt(0);
+      const block = closestTextBlock(range.startContainer);
+      const linkBtn = linkToolbar.querySelector('#pc-add-link-btn');
+      const lockBtn = linkToolbar.querySelector('#pc-lock-btn');
+      const hasSelection = sel.toString().trim().length > 0;
+      if (hasSelection) {
+        savedRange = range.cloneRange();
+        linkBtn.style.display = 'inline-block';
+      } else {
+        linkBtn.style.display = 'none';
+      }
+      if (block) {
+        activeBlockEl = block;
+        lockBtn.textContent = block.classList.contains('pc-unlocked') ? '🔓' : '🔒';
+        const rect = range.getBoundingClientRect();
+        linkToolbar.style.display = 'flex';
+        linkToolbar.style.top = Math.max(rect.top - 40, 4) + 'px';
+        linkToolbar.style.left = rect.left + 'px';
+      } else {
+        linkToolbar.style.display = 'none';
+      }
+    });
+
+    if (editModeOn) applyEditMode(doc);
+  });
+
+  function applyLinkToSavedRange(doc) {
+    if (!savedRange) return;
+    const raw = prompt('Enter a URL, phone number, WhatsApp/Google Forms link, or email:');
+    if (!raw) return;
+    let href = raw.trim();
+    if (/^\+?[0-9()\-\s]{7,}$/.test(href)) {
+      href = 'tel:' + href.replace(/[()\-\s]/g, '');
+    } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(href)) {
+      href = 'mailto:' + href;
+    } else if (!/^https?:\/\//i.test(href) && !/^(tel:|mailto:|#)/i.test(href)) {
+      href = 'https://' + href;
+    }
+    try {
+      const a = doc.createElement('a');
+      a.href = href;
+      if (href.startsWith('http')) a.target = '_blank';
+      savedRange.surroundContents(a);
+    } catch (e) {
+      const content = savedRange.extractContents();
+      const a = doc.createElement('a');
+      a.href = href;
+      if (href.startsWith('http')) a.target = '_blank';
+      a.appendChild(content);
+      savedRange.insertNode(a);
+    }
+    const toolbar = doc.getElementById('pc-link-toolbar');
+    if (toolbar) toolbar.style.display = 'none';
+    savedRange = null;
+  }
+
+  function applyEditMode(doc) {
+    doc.body.setAttribute('contenteditable', 'true');
+    doc.body.classList.add('pc-editing');
+  }
+
+  function clearEditMode(doc) {
+    doc.body.removeAttribute('contenteditable');
+    doc.body.classList.remove('pc-editing');
+    const toolbar = doc.getElementById('pc-link-toolbar');
+    if (toolbar) toolbar.style.display = 'none';
+  }
+
+  editModeBtn.addEventListener('click', () => {
+    const doc = iframe.contentDocument;
+    if (!doc || !doc.body) return;
+    editModeOn = !editModeOn;
+    editModeBtn.textContent = editModeOn ? '✎ Click to Edit: On' : '✎ Click to Edit: Off';
+    editModeBtn.classList.toggle('active', editModeOn);
+    if (editModeOn) applyEditMode(doc); else clearEditMode(doc);
+  });
+
+  imageFileInput.addEventListener('change', () => {
+    const file = imageFileInput.files[0];
+    if (!file || !activeSlotEl) return;
+    const doc = iframe.contentDocument;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const label = activeSlotEl.getAttribute('data-slot-label') || 'Photo';
+      activeSlotEl.innerHTML = `<img src="${reader.result}" alt="${label}" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+      const rm = doc.createElement('button');
+      rm.className = 'pc-slot-remove'; rm.type = 'button'; rm.textContent = '×';
+      const slotRef = activeSlotEl;
+      rm.addEventListener('click', (e) => {
+        e.stopPropagation(); e.preventDefault();
+        if (confirm('Remove this photo?')) slotRef.remove();
+      });
+      activeSlotEl.appendChild(rm);
+      activeSlotEl = null;
+    };
+    reader.readAsDataURL(file);
+    imageFileInput.value = '';
+  });
+
+  videoFileInput.addEventListener('change', () => {
+    const file = videoFileInput.files[0];
+    if (!file || !activeSlotEl) return;
+    if (file.size > 8 * 1024 * 1024) {
+      alert('That video is over 8MB. Large videos make the page slow to load and can hit storage limits — please use a shorter or more compressed clip, or paste a YouTube/Vimeo link instead.');
+      videoFileInput.value = '';
+      activeSlotEl = null;
+      return;
+    }
+    const doc = iframe.contentDocument;
+    const reader = new FileReader();
+    reader.onload = () => {
+      activeSlotEl.innerHTML = `<video src="${reader.result}" controls style="width:100%;height:100%;object-fit:cover;display:block;"></video>`;
+      const rm = doc.createElement('button');
+      rm.className = 'pc-slot-remove'; rm.type = 'button'; rm.textContent = '×';
+      const slotRef = activeSlotEl;
+      rm.addEventListener('click', (e) => {
+        e.stopPropagation(); e.preventDefault();
+        if (confirm('Remove this video?')) slotRef.remove();
+      });
+      activeSlotEl.appendChild(rm);
+      activeSlotEl = null;
+    };
+    reader.readAsDataURL(file);
+    videoFileInput.value = '';
+  });
+
+  fontSelect.addEventListener('change', () => {
+    const fontName = fontSelect.value;
+    if (!fontName) return;
+    const doc = iframe.contentDocument;
+    if (!doc) return;
+    let link = doc.getElementById('pc-font-link');
+    if (!link) {
+      link = doc.createElement('link');
+      link.id = 'pc-font-link';
+      link.rel = 'stylesheet';
+      doc.head.appendChild(link);
+    }
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;500;600;700&display=swap`;
+    let override = doc.getElementById('pc-font-override');
+    if (!override) {
+      override = doc.createElement('style');
+      override.id = 'pc-font-override';
+      doc.head.appendChild(override);
+    }
+    override.textContent = `*:not(.pc-slot):not(svg):not(svg *) { font-family: '${fontName}', sans-serif !important; }`;
+  });
+
+  function serializeCleanHtml() {
+    const doc = iframe.contentDocument;
+    const clone = doc.documentElement.cloneNode(true);
+    const cloneBody = clone.querySelector('body');
+    if (cloneBody) { cloneBody.removeAttribute('contenteditable'); cloneBody.classList.remove('pc-editing'); }
+    clone.querySelectorAll('.pc-slot-remove, .pc-section-handles, #pc-link-toolbar, .pc-resize-handle').forEach(el => el.remove());
+    clone.querySelectorAll('.pc-unlocked').forEach(el => {
+      el.classList.remove('pc-unlocked');
+      el.style.cursor = '';
+      // keep position/left/top/margin — that's the actual saved placement
+    });
+    const editorStyle = clone.querySelector('#pc-editor-style');
+    if (editorStyle) editorStyle.remove();
+    return '<!DOCTYPE html>\n' + clone.outerHTML;
+  }
+
+  async function savePage(html, statusTarget, successMsg) {
+    if (!currentSlug) return;
+    statusTarget.className = 'status';
+    statusTarget.textContent = 'Saving…';
+    try {
+      const res = await fetch(`${API_BASE}/pages/${currentSlug}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ html }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Request failed (${res.status})`);
+      }
+      statusTarget.textContent = successMsg;
+      loadProjects();
+    } catch (err) {
+      statusTarget.className = 'status err';
+      statusTarget.textContent = 'Error: ' + err.message;
+    }
+  }
+
+  saveVisualBtn.addEventListener('click', async () => {
+    saveVisualBtn.disabled = true;
+    await savePage(serializeCleanHtml(), editStatus, 'Saved — page updated at the same link.');
+    saveVisualBtn.disabled = false;
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Generating…';
+    statusEl.className = 'status';
+    statusEl.innerHTML = '<span class="spinner"></span> Drafting your page — this can take up to a minute.';
+
+    const body = {
+      business_name: businessNameInput.value,
+      industry: document.getElementById('industry').value,
+      description: document.getElementById('description').value,
+      target_audience: document.getElementById('target_audience').value,
+      style_preference: document.getElementById('style_preference').value,
+      primary_color: document.getElementById('primary_color').value,
+      sections_wanted: document.getElementById('sections_wanted').value,
+      cta_goal: document.getElementById('cta_goal').value,
+      contact_phone: document.getElementById('contact_phone').value,
+      contact_email: document.getElementById('contact_email').value,
+      contact_social: document.getElementById('contact_social').value,
+      extra_notes: document.getElementById('extra_notes').value,
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/generate`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Request failed (${res.status})`);
+      }
+      const data = await res.json();
+      currentSlug = data.slug;
+      shareLink.value = `${window.location.origin}/p/${data.slug}`;
+      loadIntoIframe(data.html);
+      previewEmpty.style.display = 'none';
+      previewFrame.style.display = 'block';
+      fullscreenBtn.style.display = 'inline-block';
+      statusEl.innerHTML = 'Draft ready. Share the link above with your client.';
+      loadProjects();
+      loadEnquiries();
+    } catch (err) {
+      statusEl.className = 'status err';
+      statusEl.textContent = 'Error: ' + err.message;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Generate page';
+    }
+  });
+
+  copyBtn.addEventListener('click', () => {
+    shareLink.select();
+    navigator.clipboard.writeText(shareLink.value).then(() => {
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+    });
+  });
+
+  attachBtn.addEventListener('click', async () => {
+    const domain = domainInput.value.trim();
+    if (!domain || !currentSlug) return;
+    attachBtn.disabled = true;
+    domainStatus.className = 'status';
+    domainStatus.textContent = 'Attaching…';
+    try {
+      const res = await fetch(`${API_BASE}/pages/${currentSlug}/domain`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ domain }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Request failed (${res.status})`);
+      }
+      domainStatus.textContent = `Attached. Point ${domain}'s DNS to this Render service, then add it under Render → Settings → Custom Domains.`;
+      loadProjects();
+    } catch (err) {
+      domainStatus.className = 'status err';
+      domainStatus.textContent = 'Error: ' + err.message;
+    } finally {
+      attachBtn.disabled = false;
+    }
+  });
+
+  notifyEmailBtn.addEventListener('click', async () => {
+    const email = notifyEmailInput.value.trim();
+    if (!email || !currentSlug) return;
+    notifyEmailBtn.disabled = true;
+    notifyEmailStatus.className = 'status';
+    notifyEmailStatus.textContent = 'Saving…';
+    try {
+      const res = await fetch(`${API_BASE}/pages/${currentSlug}/notify-email`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Request failed (${res.status})`);
+      }
+      notifyEmailStatus.textContent = 'Saved. New enquiries will be emailed there (if SMTP is configured on the server).';
+    } catch (err) {
+      notifyEmailStatus.className = 'status err';
+      notifyEmailStatus.textContent = 'Error: ' + err.message;
+    } finally {
+      notifyEmailBtn.disabled = false;
+    }
+  });
+
+  async function loadEnquiries() {
+    if (!currentSlug) return;
+    try {
+      const res = await fetch(`${API_BASE}/pages/${currentSlug}/enquiries`);
+      const data = await res.json();
+      if (!data.length) {
+        enquiriesList.innerHTML = '<p class="hint">No enquiries yet.</p>';
+        return;
+      }
+      enquiriesList.innerHTML = '';
+      data.forEach(enq => {
+        const row = document.createElement('div');
+        row.className = 'project-item';
+        const date = new Date(enq.created_at).toLocaleString();
+        const fieldsHtml = Object.entries(enq.fields).map(([k, v]) => `<b>${k}:</b> ${v}`).join(' · ');
+        row.innerHTML = `<div><div class="project-item-meta">${date}</div><div style="font-size:13px;color:#F5F7FC;margin-top:4px;">${fieldsHtml}</div></div>`;
+        enquiriesList.appendChild(row);
+      });
+    } catch (e) {
+      enquiriesList.innerHTML = '<p class="hint">Could not load enquiries.</p>';
+    }
+  }
+
+  refreshEnquiriesBtn.addEventListener('click', loadEnquiries);
+
+  aiEditBtn.addEventListener('click', async () => {
+    const instruction = aiEditInput.value.trim();
+    if (!instruction || !currentSlug) return;
+    aiEditBtn.disabled = true;
+    aiEditStatus.className = 'status';
+    aiEditStatus.innerHTML = '<span class="spinner"></span> Applying change…';
+    try {
+      const res = await fetch(`${API_BASE}/pages/${currentSlug}/edit`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ instruction }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Request failed (${res.status})`);
+      }
+      const data = await res.json();
+      loadIntoIframe(data.html);
+      aiEditStatus.textContent = 'Change applied — page updated at the same link.';
+      aiEditInput.value = '';
+    } catch (err) {
+      aiEditStatus.className = 'status err';
+      aiEditStatus.textContent = 'Error: ' + err.message;
+    } finally {
+      aiEditBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
