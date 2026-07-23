@@ -242,6 +242,10 @@
               <label>Sections wanted <span class="hint">(optional)</span></label>
               <input type="text" id="sections_wanted" placeholder="Hero, Menu highlights, Gallery, Reviews, Contact" />
             </div>
+            <div class="field" style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" id="hero_video" style="width:auto;" />
+              <label style="margin:0;" for="hero_video">Use a background video in the hero section <span class="hint">(you'll upload the actual video after generating)</span></label>
+            </div>
             <div class="row2">
               <div class="field">
                 <label>Contact phone</label>
@@ -570,32 +574,49 @@
       sec.appendChild(handles);
     });
 
-    // Slot click -> upload (image) or video source picker
+    // Slot click -> always offer a choice: Photo or Video, regardless of what the AI guessed originally
+    let mediaChoicePopup = doc.getElementById('pc-media-choice');
+    if (!mediaChoicePopup) {
+      mediaChoicePopup = doc.createElement('div');
+      mediaChoicePopup.id = 'pc-media-choice';
+      mediaChoicePopup.className = 'link-toolbar';
+      mediaChoicePopup.innerHTML = `
+        <button type="button" id="pc-choice-photo">📷 Photo</button>
+        <button type="button" id="pc-choice-video">🎬 Video</button>`;
+      doc.body.appendChild(mediaChoicePopup);
+      mediaChoicePopup.querySelector('#pc-choice-photo').addEventListener('click', () => {
+        mediaChoicePopup.style.display = 'none';
+        if (activeSlotEl) { imageFileInput.click(); }
+      });
+      mediaChoicePopup.querySelector('#pc-choice-video').addEventListener('click', () => {
+        mediaChoicePopup.style.display = 'none';
+        if (activeSlotEl) { handleVideoSlot(activeSlotEl); }
+      });
+    }
+
     doc.body.addEventListener('click', (e) => {
       if (!editModeOn) return;
-      if (e.target.closest('.pc-slot-remove')) return;
+      if (e.target.closest('.pc-slot-remove') || e.target.closest('#pc-media-choice')) return;
       const slot = e.target.closest('.pc-slot');
-      if (!slot) return;
+      if (!slot) { mediaChoicePopup.style.display = 'none'; return; }
       e.preventDefault();
-      const slotType = slot.getAttribute('data-slot-type') || 'image';
-      if (slotType === 'video') {
-        handleVideoSlot(slot);
-      } else {
-        activeSlotEl = slot;
-        imageFileInput.click();
-      }
+      activeSlotEl = slot;
+      const rect = slot.getBoundingClientRect();
+      mediaChoicePopup.style.display = 'flex';
+      mediaChoicePopup.style.top = Math.max(rect.top - 40, 4) + 'px';
+      mediaChoicePopup.style.left = rect.left + 'px';
     });
 
     function handleVideoSlot(slot) {
       const link = prompt('Paste a YouTube or Vimeo link — or leave this blank and click OK to upload a video file instead:');
-      if (link === null) return; // cancelled
+      if (link === null) { activeSlotEl = null; return; } // cancelled
       if (link.trim()) {
         const embedUrl = toEmbedUrl(link.trim());
-        if (!embedUrl) { alert('Could not recognize that as a YouTube or Vimeo link.'); return; }
+        if (!embedUrl) { alert('Could not recognize that as a YouTube or Vimeo link.'); activeSlotEl = null; return; }
         slot.innerHTML = `<iframe src="${embedUrl}" style="width:100%;height:100%;border:0;display:block;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
         addRemoveButton(slot);
+        activeSlotEl = null;
       } else {
-        activeSlotEl = slot;
         videoFileInput.click();
       }
     }
@@ -921,6 +942,7 @@
       style_preference: document.getElementById('style_preference').value,
       primary_color: document.getElementById('primary_color').value,
       sections_wanted: document.getElementById('sections_wanted').value,
+      hero_video: document.getElementById('hero_video').checked,
       cta_goal: document.getElementById('cta_goal').value,
       contact_phone: document.getElementById('contact_phone').value,
       contact_email: document.getElementById('contact_email').value,
