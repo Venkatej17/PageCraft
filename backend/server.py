@@ -49,6 +49,7 @@ class PageCreate(BaseModel):
     contact_email: Optional[str] = ""
     contact_social: Optional[str] = ""
     extra_notes: Optional[str] = ""
+    hero_video: Optional[bool] = False
 
 
 class DomainUpdate(BaseModel):
@@ -100,9 +101,25 @@ no frameworks. The page must:
   Example: <div class="pc-slot" data-slot-type="image" data-slot-label="Hero photo" style="width:100%;
   height:420px;border-radius:12px;background:linear-gradient(135deg, COLOR1, COLOR2);display:flex;
   align-items:center;justify-content:center;"><svg>...camera icon...</svg></div>
-- If a video would genuinely add value (e.g. a hotel/resort tour, a restaurant ambiance clip, a product demo),
-  include ONE video slot: same pc-slot div structure but with data-slot-type="video" and a centered inline SVG
-  play-button icon instead of a camera icon. Do not add a video slot for businesses where it wouldn't add value.
+- If HERO_VIDEO is "yes" below: the hero section must use a full-bleed BACKGROUND VIDEO behind the hero text,
+  not a boxed slot. Structure it like this:
+  <section class="pc-section" data-section-name="Hero" style="position:relative;min-height:100vh;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;">
+    <div class="pc-slot" data-slot-type="video" data-slot-label="Hero background video"
+      style="position:absolute;inset:0;width:100%;height:100%;
+      background:linear-gradient(135deg, COLOR1, COLOR2);display:flex;align-items:center;
+      justify-content:center;z-index:0;"><svg>...large play-button icon at low opacity...</svg></div>
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.42);z-index:1;"></div>
+    <div style="position:relative;z-index:2;text-align:center;color:#fff;padding:0 24px;">
+      <!-- headline, subheadline, CTA button go here, in light text colors for contrast over the dark overlay -->
+    </div>
+  </section>
+  The dark overlay div is required for text legibility once a real video is behind it — never skip it.
+- If HERO_VIDEO is "no": do not add any video slot anywhere on the page — only image slots as described above.
+- If a video would ALSO genuinely add value somewhere else on the page (e.g. a hotel room tour, a restaurant
+  ambiance clip, separate from the hero), you may include one additional boxed video slot elsewhere: same
+  pc-slot div structure as an image slot but with data-slot-type="video" and a play-button icon instead of
+  a camera icon.
 - If the business is a hotel, resort, homestay, or similar hospitality business: include a "Book Now" section
   with a real <form class="pc-enquiry-form" data-form-kind="booking">. Give every input a `name` attribute:
   name="name", name="phone", name="checkin" (type="date"), name="checkout" (type="date"),
@@ -142,6 +159,7 @@ Contact phone: {p.contact_phone or "N/A"}
 Contact email: {p.contact_email or "N/A"}
 Contact / social link: {p.contact_social or "N/A"}
 Additional notes: {p.extra_notes or "N/A"}
+HERO_VIDEO: {"yes" if p.hero_video else "no"}
 
 Write real, specific copy for this business — not lorem ipsum, not generic placeholders. Make it sound
 like it was written by a copywriter who understands this specific industry and audience."""
